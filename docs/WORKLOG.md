@@ -254,3 +254,85 @@ CHANGELOG has no such case).
   (same checksum over all its files before and after).
 - From stage 4 on, the skills run from the installed copy at `e79f19c`. Claude Code has to be
   restarted to load them.
+
+## 2026-11-21 · Stage 4: Docs and going public
+
+- **Skill version:** `implement-ticket` from the installed copy in `~/.claude/skills`, identical
+  (`diff -r`) to `skills/` at `e79f19c` (1.0 skills, plugin version still 0.1.0).
+- **Branch:** `stage-04-docs-public` · Ticket: [04-docs-and-going-public](tickets/04-docs-and-going-public.md) ·
+  Issue #4
+- **Time:** 20 min, given by the maintainer
+
+### Questions asked
+
+Round 1 (plan step):
+
+1. File locations: `docs/workflow.md`, `docs/install.md`, `templates/CLAUDE.md`,
+   `templates/WORKLOG.md` (D57).
+2. Full-history scan finds `planted.md:3` in `7da7cf6`, reachable only from `refs/pull/14/head`
+   (the fake path of D36): accepted and documented (D60).
+3. README first screen as drafted (D58).
+4. `CLAUDE.md` template with only what the skills read (D59).
+5. Plan, verification and branch: confirmed, with one change: the maintainer runs the visibility
+   switch after viewing the README on GitHub; the agent stops after the final scan (D62).
+
+Extra round: none.
+
+Decided by the agent and logged: D58 (how the first screen is measured), D61, D63, D64.
+
+### What was tested
+
+- Install guide: in an empty HOME, `claude plugin marketplace add <repo>`, `install`, `details`
+  (`Skills (2) grill-ticket, implement-ticket`), `marketplace update` and `update` all ran.
+- Local link check with lychee 0.24.2 and CI's arguments: 0 errors (1 error before the review fix,
+  which is also the positive check). All relative links resolve.
+- Templates rendered through GitHub's Markdown API: no placeholder is stripped (before the fix,
+  `<YYYY-MM-DD>`, `<n>` and `<English>` were).
+- AC13: every credited idea found in `skills/` by grep (decision tree, frontier, facts vs
+  decisions, seams with the one-line note, red before green, tracer bullet). Credit links checked
+  with `gh api` at `abeeaf9`.
+- AC14: grep for catch/detect/find/prevent in README and workflow page; no sentence credits the
+  review with what only R10/R11 address. The review agreed.
+- `plugin validate --strict` (both manifests), `check-no-german`, `check-changelog` (with
+  self-tests), privacy lint with the private list over the stage commit: all clean.
+- Pre-scan for going public (before the merge):
+  - Privacy lint with the private list, `--tree --range --all`: clean.
+  - Mirror clone including `refs/pull/13–17`: only `planted.md:3` in `7da7cf6` (D60).
+  - Issue, PR and review texts and comments (148 lines, counts only): 0 private terms, 0 home
+    paths, 0 non-noreply emails. Positive checks: a planted copy of one pattern and a fake home path
+    were both counted.
+
+- PR #18: all six CI checks green. Merged as `adf4aca`.
+- Final full-history scan after the merge, with the maintainer's private list, on a fresh mirror
+  clone (8 refs: 2 branches, 0 tags, 6 `refs/pull`; 18 commits). Counts only:
+  - AC26, branches and tags: 0 findings.
+  - AC28, all refs including `refs/pull/*`: 1 finding, `planted.md:3` in `7da7cf6`, reachable
+    only from `refs/pull/14/head`. This is the known fake path (D60).
+  - Tracked files at `main` plus all local refs: 0 findings.
+  - AC29, issue and PR titles, bodies, comments and reviews (165 lines): 0 private terms, 0 home
+    paths, 0 non-noreply emails. Positive checks: a planted pattern and a fake home path were
+    both counted.
+
+### Not tested yet
+
+- AC12 (first screen at 1280×800 on GitHub): the maintainer views the README on GitHub.
+- The visibility switch (the maintainer's step, D62) and the external link check against the
+  repo's own URLs afterwards.
+- This worklog commit came after the scan. Only the pre-push hook and CI's private-list check on
+  `main` cover it.
+
+### Review findings (fresh subagent with REVIEW.md, two axes)
+
+Fixed:
+
+- The `WORKLOG.md` template's placeholder `[<document>](<path>)` parsed as a relative link and
+  broke the blocking local link check.
+- Found while fixing it: GitHub strips bare `<placeholder>` text in the templates; all
+  placeholders are now in backticks.
+
+Not fixed:
+
+- `plugin.json` stays at 0.1.0 until the release, so `claude plugin update` may keep a cached copy
+  (assumption, untested). Logged as open question Q1, blocking stage 12.
+- Merging removes the lychee exclusion while the repo is still private. If the weekly link check
+  runs before the switch (Mondays 06:17 UTC), it opens an issue listing the 12 issue URLs as 404.
