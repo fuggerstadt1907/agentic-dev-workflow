@@ -1,0 +1,109 @@
+# Free checks on every PR and on pushes to main. No API key, no model calls.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+env:
+  CLAUDE_CODE_VERSION: "2.1.329"
+
+jobs:
+  plugin:
+    name: Validate and install check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install Claude Code
+        run: npm install -g "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}"
+      - name: Validate plugin and marketplace (strict)
+        run: |
+          claude plugin validate --strict .claude-plugin/plugin.json
+          claude plugin validate --strict .claude-plugin/marketplace.json
+      - name: "Install path (a): local marketplace in an empty HOME"
+        run: |
+          export HOME="$(mktemp -d)"
+          claude plugin marketplace add "$GITHUB_WORKSPACE"
+          claude plugin install agentic-dev-workflow@agentic-dev-workflow
+          claude plugin details agentic-dev-workflow | tee details.txt
+          # Match the inventory line, not the description (which names both skills too).
+          grep -Eq '^ *Skills \(2\) +grill-ticket, implement-ticket *$' details.txt
+      - name: "Install path (b): copy skills/ into ~/.claude/skills in an empty HOME"
+        run: |
+          export HOME="$(mktemp -d)"
+          mkdir -p "$HOME/.claude/skills"
+          cp -R skills/. "$HOME/.claude/skills/"
+          test -f "$HOME/.claude/skills/grill-ticket/SKILL.md"
+          test -f "$HOME/.claude/skills/implement-ticket/SKILL.md"
+          claude plugin validate --strict "$HOME/.claude/skills"
+
+  privacy:
+    name: Privacy lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Generic patterns and commit emails
+        env:
+          EVENT: ${{ github.event_name }}
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD: ${{ github.event.pull_request.head.sha }}
+          PUSH_BEFORE: ${{ github.event.before }}
+          PUSH_AFTER: ${{ github.sha }}
+        run: |
+          if [ "$EVENT" = pull_request ]; then
+            range="$PR_BASE..$PR_HEAD"
+          elif [ -z "$PUSH_BEFORE" ] || ! git cat-file -e "$PUSH_BEFORE^{commit}" 2>/dev/null; then
+            # first push or force-push: the old tip is unknown, scan all of HEAD's history
+            range="$PUSH_AFTER"
+          else
+            range="$PUSH_BEFORE..$PUSH_AFTER"
+          fi
+          scripts/privacy-lint.sh --tree --range "$range"
+      # Private list only on pushes to main: secrets never reach fork PRs.
+      - name: Private pattern list
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          PRIVATE_PATTERNS: ${{ secrets.PRIVATE_PATTERNS }}
+          PUSH_BEFORE: ${{ github.event.before }}
+          PUSH_AFTER: ${{ github.sha }}
+        run: |
+          if [ -z "$PRIVATE_PATTERNS" ]; then
+            echo "Secret PRIVATE_PATTERNS is not set." >&2
+            exit 1
+          fi
+          list="$RUNNER_TEMP/private-patterns"
+          printf '%s\n' "$PRIVATE_PATTERNS" > "$list"
+          if [ -z "$PUSH_BEFORE" ] || ! git cat-file -e "$PUSH_BEFORE^{commit}" 2>/dev/null; then
+            range="$PUSH_AFTER"
+          else
+            range="$PUSH_BEFORE..$PUSH_AFTER"
+          fi
+          scripts/privacy-lint.sh --tree --range "$range" --private "$list"
+
+  links-local:
+    name: Links (local, blocking)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
+        with:
+          args: --offline --no-progress --include-fragments './**/*.md'
+          fail: true
+
+  links-external:
+    name: Links (external, non-blocking)
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
+        with:
+          args: --config .github/lychee.toml --no-progress './**/*.md'
+          fail: true

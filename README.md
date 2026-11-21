@@ -1,38 +1,47 @@
-# Claude Code Skills
+# agentic-dev-workflow
 
-Meine Skills für [Claude Code](https://claude.com/claude-code). Die Skills sind auf Deutsch
-geschrieben, arbeiten aber in der Sprache des jeweiligen Projekts.
+Two Claude Code skills for agentic development. `grill-ticket` turns a ticket into a requirements
+document with decisions and stages. `implement-ticket` builds one stage at a time, with a review
+by a fresh subagent and one commit per stage.
 
-## Skills
+> Work in progress. This README is a stub; the full version with the workflow diagram follows in
+> stage 4 of [the requirements](docs/requirements.md#stages). The skill texts are still in German
+> until stage 2; they work in the language of the project they run in.
 
-| Skill | Wofür |
-| --- | --- |
-| [`grill-ticket`](skills/grill-ticket/SKILL.md) | Requirements-Phase: prüft ein Ticket aus elf Blickwinkeln auf Readiness, fragt nach, bis nichts mehr angenommen ist, und schreibt ein Requirements-Dokument. |
-| [`implement-ticket`](skills/implement-ticket/SKILL.md) | Umsetzungs-Phase: setzt eine Etappe aus diesem Dokument um, fragt bei Lücken nach, prüft gegen die Akzeptanzkriterien, lässt reviewen und committet. |
+## Install
 
-Die beiden gehören zusammen:
+As a plugin (recommended), inside Claude Code:
 
-```
-/grill-ticket #123                    → docs/…/requirements.md (Status: ready)
-/implement-ticket docs/…/requirements.md   → Etappe 1 umgesetzt und committet
-/clear
-/implement-ticket docs/…/requirements.md   → Etappe 2 …
+```text
+/plugin marketplace add fuggerstadt1907/agentic-dev-workflow
+/plugin install agentic-dev-workflow@agentic-dev-workflow
 ```
 
-Beide Skills starten nur per Slash-Befehl (`disable-model-invocation: true`). Optional nutzen sie
-die Skills `humanizer`, `code-review` und `tdd`, wenn sie installiert sind.
-
-## Installation
-
-Einzelnen Skill für alle Projekte installieren:
+Fallback: copy the skills, for all projects or for one project.
 
 ```bash
-git clone https://github.com/<user>/claude-skills.git
-cp -R claude-skills/skills/grill-ticket ~/.claude/skills/
+git clone https://github.com/fuggerstadt1907/agentic-dev-workflow.git
+cp -R agentic-dev-workflow/skills/grill-ticket agentic-dev-workflow/skills/implement-ticket ~/.claude/skills/
+# or, for one project only: copy them into <project>/.claude/skills/
 ```
 
-Oder nur für ein Projekt: in dessen `.claude/skills/` kopieren.
+## Usage
 
-## Lizenz
+```text
+/grill-ticket #123                          → docs/…/requirements.md (Status: ready)
+/implement-ticket docs/…/requirements.md    → stage 1 built, reviewed, committed
+/clear
+/implement-ticket docs/…/requirements.md    → stage 2 …
+```
+
+The short form (`/implement-ticket`) works as long as no other installed skill has the same name.
+The namespaced form always works: `/agentic-dev-workflow:grill-ticket`,
+`/agentic-dev-workflow:implement-ticket`.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Licence
 
 [MIT](LICENSE)
