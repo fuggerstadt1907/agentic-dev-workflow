@@ -120,9 +120,16 @@ tip).
 
 ### Not tested yet
 
-- The switch (D43) and reading a real German requirements document with the English skills. Both
-  happen after the merge.
-- The link check runs in CI only (lychee is not installed locally).
+- The link check runs in CI only (lychee is not installed locally); it passed on PR #15.
+- D43: reading an existing German requirements document with the installed English skills. Not
+  run yet.
+
+### Switch to the English skills (after the merge, D43)
+
+- PR #15 merged as `e36a6d8`. The German copies moved to `~/.claude/skills-backup-de/`, identical
+  (`diff -r`) to `skills/` at `0cf58ff`. `~/.claude/skills` now holds `skills/` from `e36a6d8`,
+  checked with `diff -r`.
+- From stage 3 on, the skills run from the installed English copy at `e36a6d8`.
 
 ### Review findings (fresh subagent, plus a re-check of the fixes)
 
