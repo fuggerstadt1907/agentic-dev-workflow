@@ -322,7 +322,7 @@ run; only the maintainer commits a new result. Partial runs are never committed.
 Each stage has a ticket file `docs/tickets/NN-<slug>.md` and a GitHub issue (R24). Stage *n* maps
 to the ticket file whose `NN` is *n* (zero-padded) and to issue #*n*.
 
-- **Stage 1: Repo skeleton (private)** · open · R2 (manifest, marketplace, README stub), R19, R20,
+- **Stage 1: Repo skeleton (private)** · done · 2026-11-21 · stage-01-skeleton · R2 (manifest, marketplace, README stub), R19, R20,
   R21, R22, R23, R24, R25. Rewrite the initial commit to noreply, then push to a private GitHub
   repo; CI is green on a PR; tickets and issues exist. Testable through CI and a planted lint
   violation.

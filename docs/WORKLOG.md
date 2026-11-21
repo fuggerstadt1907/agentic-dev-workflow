@@ -33,10 +33,25 @@ ran (R25). The entry format becomes a template in stage 4.
   planted term was confirmed present in the input first.
 - Lint over this repo's tree and history: clean.
 
+### Tested on GitHub
+
+- Before the first push: `git log --format='%h %ae %ce' --all` showed only the noreply address;
+  the lint with the maintainer's real private list over the tree and all branches was clean. A
+  self-check (the list's patterns run against a copy of the list in a temp repo) confirmed the
+  patterns fire; matching is case-insensitive (tested with upper, lower and mixed case).
+- Private repo created, `main` pushed through the hook. Issues #1–#12 created, matching the ticket
+  files.
+- PR #13: all four checks green. The CI log shows `Skills (2)  grill-ticket, implement-ticket` and
+  both strict validations.
+- PR #14 (throwaway, based on `stage-01-skeleton`) planted a fake home path. The local hook blocked
+  the push (pushed with `--no-verify` on purpose); CI's privacy lint failed with `planted.md:3`
+  only, and the planted text does not appear anywhere in the run log. This also covers mawk on the
+  Ubuntu runner. PR closed unmerged, branch deleted (D36).
+
 ### Not tested yet
 
-- CI on GitHub (green PR, planted-violation PR), issue creation, the `PRIVATE_PATTERNS` step on
-  `main` and the weekly link job: they need the remote, which comes after the maintainer's OK.
+- The `PRIVATE_PATTERNS` step on `main` (runs on the merge, needs the secret) and the weekly link
+  job.
 
 ### Review findings (fresh subagent, two axes: standards and spec)
 
@@ -60,8 +75,7 @@ Fixed:
 - Doc nits: CONTRIBUTING said the private list is matched against emails; `--help` printed code
   lines; usage errors exited 1 instead of 2; ticket lines over 100 columns.
 
-Not fixed: the external link job's red check is non-blocking by design (D35). mawk on the Ubuntu
-runner is covered by the planted-violation PR, not tested locally.
+Not fixed: the external link job's red check is non-blocking by design (D35).
 
 All tests above were rerun after the fixes, plus the review's cases (pattern in a file name,
 invalid and `\b` patterns, loose noreply addresses, colon and space in file names, unknown remote
