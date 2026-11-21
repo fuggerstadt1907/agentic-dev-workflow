@@ -49,10 +49,13 @@ alternative.
 
 ### Stages
 
-Only where it makes sense. Per stage: scope (R-numbers), why it is deliverable and testable on its
-own, and a status (`open`, later set by `/implement-ticket` to `done · <date> · <branch>`).
+Only where it makes sense. Per stage: scope (R-numbers), the ticket it is tracked in (ticket file
+or issue; the document's own ticket if the stage has none of its own), why it is deliverable and
+testable on its own, and a status (`open`, later set by `/implement-ticket` to
+`done · <date> · <branch>`). `/implement-ticket` uses the ticket to point from a raw ticket to its
+stage.
 
-- **Stage 1: <title>** · open · R1, R2 – …
+- **Stage 1: <title>** · open · R1, R2 · Ticket: <file path / #123> – …
 
 ## Rollout and release
 
@@ -66,6 +69,8 @@ own, and a status (`open`, later set by `/implement-ticket` to `done · <date> �
 | --- | -------- | -------- | ------ |
 
 ## Open questions
+
+"Blocks" names stages, R-numbers or AC IDs (`Stage 2`, `R3`, `AC4`), or "all".
 
 | #   | Question | Owner | Blocks |
 | --- | -------- | ----- | ------ |
