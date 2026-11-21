@@ -1,7 +1,8 @@
 # Worklog
 
 One entry per stage of [requirements.md](requirements.md). Each entry records which skill version
-ran (R25). The entry format becomes a template in stage 4.
+ran (R25). The entry format is published as a template in
+[`templates/WORKLOG.md`](../templates/WORKLOG.md).
 
 ## 2026-11-21 · Stage 1: Repo skeleton (private)
 

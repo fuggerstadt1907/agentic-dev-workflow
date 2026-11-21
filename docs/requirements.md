@@ -1,6 +1,6 @@
 # Requirements: agentic-dev-workflow 1.0
 
-> Status: ready · Ticket: docs/brief.md · Updated: 2026-11-21
+> Status: not ready · Ticket: docs/brief.md · Updated: 2026-11-21
 
 ## Summary
 
@@ -254,6 +254,13 @@ shows whatever the eval measured, including metrics where the skill does not bea
   matches, and that is recorded in the worklog.
 - **AC27 (R39)**: The worklog has entries for the real-user install from GitHub, the test reader
   session and the switch of the maintainer's own setup.
+- **AC28 (R38, attacker view)**: Given someone who clones the public repo with all refs, including
+  GitHub's `refs/pull/*`, when they search the history for home paths, non-noreply emails or the
+  maintainer's private terms, then they find nothing except the fake path of the throwaway PR #14
+  (D60).
+- **AC29 (R38, attacker view)**: Given someone who reads every issue, pull request and comment of
+  the public repo, when they search for private terms, non-noreply emails or home paths, then they
+  find none.
 
 ## Edge cases and failure modes
 
@@ -332,7 +339,7 @@ to the ticket file whose `NN` is *n* (zero-padded) and to issue #*n*.
   by side-by-side review. The maintainer switches to the English version afterwards.
 - **Stage 3: Skills 1.0** · done · 2026-11-21 · stage-03-skills-1-0 · R4–R13. Lessons from the case study, REVIEW.md, worklog step,
   CHANGELOG. Testable with AC3–AC11 on a small scratch project.
-- **Stage 4: Docs and going public** · open · R14 (with status line), R15, R16, R17, R18, R38.
+- **Stage 4: Docs and going public** · done · 2026-11-21 · stage-04-docs-public · R14 (with status line), R15, R16, R17, R18, R38.
   Also remove the exclusion of this repo's own URLs from `.github/lychee.toml` (D35).
   Ends with the full-history privacy scan and the visibility switch.
 - **Stage 5: Cost estimate and runner spike** · open · R26, R27. One case, both arms; decides the
@@ -427,7 +434,17 @@ is replaced in stage 1 and 4.
 | D54 | Verifying stage 3 | AC3 (refusal) and AC8 run headless with `claude -p --plugin-dir` on a scratch project, after a load check of the plugin command. Everything else is one manual run by the maintainer on the same scratch project, also with `--plugin-dir`, never the installed copies. Results per AC go into the worklog | Tests the new version, not the installed one; headless runs cannot answer questions |
 | D55 | Free-text "Blocks" entries (stage 3, review) | implement-ticket treats a "Blocks" entry without a stage, R or AC ID as blocking every stage whose requirements it touches, and as blocking when unsure (fail closed). grill-ticket and the template name stages, R-numbers or AC IDs in "Blocks". Asked as the stage's one extra round (D46): the review found it, the plan had not foreseen it | Free text failed open and could let a stage be built on an unsettled decision; older documents keep working |
 | D56 | User edits in files the stage touches (stage 3, review) | If a file the skill edits (the worklog included) already had uncommitted changes of the user's, the skill stages only its own hunks or asks; the worklog confirmation names such changes. Decided by the agent | The R7 incident in the case study was exactly a swept worklog note |
+| D57 | File locations (stage 4) | `docs/workflow.md`, `docs/install.md`, `templates/CLAUDE.md`, `templates/WORKLOG.md` | Public names; templates at the top level are easy to find and copy |
+| D58 | README first screen (stage 4) | Purpose in three sentences, the status line, the diagram, the plain-text line, then the install command; text as confirmed by the maintainer. AC12's first screen is measured at 1280×800 from the README title, because GitHub's repo page puts the file list above the README. The measure was decided by the agent | R14; nothing else is achievable on the repo page |
+| D59 | `CLAUDE.md` template (stage 4) | Only what the skills read: language, checks, git and confirmation rules, where requirements and worklog live, must-haves. The `WORKLOG.md` template follows this repo's entry format | Short templates get filled in; every section has a reader |
+| D60 | PR refs in the privacy scan (stage 4) | The full-history scan covers all branches and tags, GitHub's `refs/pull/*` (mirror clone) and the text of issues, PRs and comments. Its only match is `planted.md:3` in `7da7cf6`, reachable only from `refs/pull/14/head`: the fake `example` path of D36. Accepted and recorded as a known exception; AC26's "zero matches" applies to branches and tags | PR refs go public with the repo and cannot be deleted without GitHub Support; the match is a fake name planted on purpose |
+| D61 | "Pre-push hook over the whole history" (stage 4) | The hook skips commits already on the remote, so the full-history run calls `scripts/privacy-lint.sh` directly with the private list, which is what the hook runs. Decided by the agent | Same rules as the hook, over every commit |
+| D62 | Visibility switch (stage 4) | The maintainer switches the repo to public after viewing the README on GitHub. The agent stops after the final scan and hands over the command; after the switch it runs the link check once against the repo's own URLs | Irreversible and outward-facing; the maintainer checks the first screen first |
+| D63 | Credits and CHANGELOG (stage 4) | Credits name Matt Pocock's `grilling`, `tdd` and `to-tickets`, linked by permalink at `abeeaf9`, each with the ideas used and where. No CHANGELOG entry, since stage 4 changes neither the skills nor the plugin. Decided by the agent | R17, AC13: every named idea appears in the skills (checked by grep); the CHANGELOG covers skills and plugin |
+| D64 | Prevention vs detection (stage 4) | A section in the README and on the workflow page; the report follows in stage 9 (R33) | R18 for the texts that exist now |
 
 ## Open questions
 
-None.
+| # | Question | Owner | Blocks |
+| --- | --- | --- | --- |
+| Q1 | `plugin.json` stays at `0.1.0` until the release (D38). Does `claude plugin update` pick up skill changes from GitHub while the version is unchanged, or does it keep the cached copy? Then either bump the version with each skill change, or add a note to the install guide. Found in the stage 4 review; not tested (assumption) | Maintainer and agent, at the latest in stage 12 | Stage 12 |
