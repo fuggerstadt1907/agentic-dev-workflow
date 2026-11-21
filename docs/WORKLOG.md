@@ -9,7 +9,8 @@ ran (R25). The entry format becomes a template in stage 4.
   (`diff -r`) to `skills/` at the initial commit `854a750`. German text, pre-1.0.
 - **Branch:** `stage-01-skeleton` · Ticket: [01-repo-skeleton](tickets/01-repo-skeleton.md) ·
   Issue #1
-- **Time:** TODO
+- **Time:** ~70 min wall-clock (2026-11-20 ~10 min context and plan; 2026-11-21 ~60 min build,
+  review, push, CI), estimated from file and commit timestamps
 
 ### Questions asked (one round)
 
