@@ -244,3 +244,12 @@ Fixed:
 
 Not fixed: `](` inside a code span still counts as a link in `check-changelog.sh` (nit; the
 CHANGELOG has no such case).
+
+### Switch to the 1.0 skills (after the merge, as in D43)
+
+- PR #16 merged as `e79f19c`. `~/.claude/skills/grill-ticket` and `implement-ticket` now hold
+  `skills/` from `e79f19c` (taken with `git archive`), checked with `diff -r`; `implement-ticket`
+  now includes `REVIEW.md`. The German backup in `~/.claude/skills-backup-de/` was not touched
+  (same checksum over all its files before and after).
+- From stage 4 on, the skills run from the installed copy at `e79f19c`. Claude Code has to be
+  restarted to load them.
