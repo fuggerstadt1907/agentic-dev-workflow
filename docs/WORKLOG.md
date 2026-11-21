@@ -151,3 +151,96 @@ Fixed:
   column is now read in the document's language.
 
 Not fixed: none.
+
+## 2026-11-21 · Stage 3: Skills 1.0
+
+- **Skill version:** `implement-ticket` from the installed copy in `~/.claude/skills`, identical
+  (`diff -r`) to `skills/` at `e36a6d8`. English, pre-1.0. The stage changed the skills it ran
+  with; the checks below ran the new version from this branch through `--plugin-dir`.
+- **Branch:** `stage-03-skills-1-0` · Ticket: [03-skills-1-0](tickets/03-skills-1-0.md) · Issue #3
+- **Time:** ~50 min wall-clock, including the 15-min manual test run, given by the maintainer
+
+### Questions asked
+
+Round 1 (plan step):
+
+1. R6, a decision the plan could not foresee: a second round is allowed only for the ask
+   categories; the rest keeps building, and the report and worklog count extra rounds (D46).
+2. R12, worklog time: the maintainer's answer replaced "proposes a time". The skill leaves `TODO`
+   and asks; it shows raw timestamps at most (D47).
+3. Verification: headless runs for the refusals after a load check, one manual run for the rest,
+   both with the plugin from this branch (D54).
+4. Plan and branch: confirmed. The stage 2 switch note went in as its own commit, with the
+   German-document check marked open.
+
+Follow-up in the same round, because answer 2 left the commit open: only the worklog entry waits
+for the OK and the time; AC10 reworded (D48). The maintainer then reported the D43 check as run;
+it is recorded under stage 2.
+
+Extra round (D46), triggered by a review finding the plan had not foreseen: free-text "Blocks"
+entries failed open. Decision: fail closed, and grill-ticket names IDs in "Blocks" (D55).
+
+Decided by the agent and logged: D49–D53, D56.
+
+### What was tested
+
+- Load check: `claude -p --plugin-dir` runs `/agentic-dev-workflow:implement-ticket` from this
+  branch (it refused a plain text file). Sonnet, about $0.10.
+- AC3, refusal (headless, Sonnet): `stage 2` of a `not ready` scratch document is refused, and the
+  run names Q1 and offers stage 1 as unblocked. Re-run after the review fixes: same result. A
+  variant with a free-text "Blocks" entry (`Export format`) is refused too (D55). The planted entry
+  was confirmed present in the copy before the run.
+- AC8 (headless, Sonnet): `docs/tickets/02-export.md` as input is refused and names
+  `docs/requirements.md` and stage 2.
+- Five headless runs, including the load check, at $0.10 to $0.12 each, about $0.58 in total. None
+  changed a file in its copy.
+- Manual run by the maintainer on stage 1 of the scratch project, with the skills from this branch
+  through `--plugin-dir`, on the version before the review fixes. Results as reported by the
+  maintainer, the file-based ones also checked by the agent:
+  - AC3: passed. Stage 1 was picked from the `not ready` document without a question about Q1,
+    which the run said blocks only stage 2. Stage 2 was refused afterwards and pointed to
+    `/grill-ticket`.
+  - AC4: passed. No `code-review` call in the transcripts. A grep over the scratch transcripts
+    finds "# Review instructions" and "Two axes, reported separately" in the main session and in
+    the review subagent.
+  - AC5: passed. A "Decided by me" section (D5–D9); questions only on public output, in one round,
+    no extra round.
+  - AC6: passed. Stage commit `a36e597` has 6 files, `notes.txt` is not among them and stayed
+    untracked.
+  - AC7: passed. A question named its source ("Verified: docs/requirements.md, Edge cases").
+  - AC9: passed. The plan marked the stage security-relevant and added AC-S1 to AC-S3 ("Given an
+    attacker who …"); every "no `<script>`" assertion has a positive check of the payload.
+  - AC10: passed. `Time: TODO`, only raw start and end times labelled "not an estimate"; the
+    worklog entry was committed on its own (`c3b9a23`, only `WORKLOG.md`) after the maintainer's
+    OK.
+- AC11: `scripts/check-changelog.sh` passes; its self-test flags an entry without a link and a
+  case-study link without a SHA. CI runs both. The reviewer checked all seven permalinks against
+  `127aae8`.
+- AC1 still holds: `scripts/check-no-german.sh` and its self-test pass.
+- `claude plugin validate --strict` for plugin, marketplace and copied skills; the install check in
+  an empty HOME lists both skills (Claude Code 2.1.330 locally). Privacy lint over the branch is
+  clean.
+
+### Not tested yet
+
+- Not run end to end after the review fixes: D56 (user edits in touched files) and the refusal
+  when no stage is given and every open stage is blocked. D55 ran headless for a given stage.
+- The link check with fragments runs in CI only; the CHANGELOG anchors to this entry resolve only
+  once this entry is committed.
+
+### Review findings (fresh subagent with REVIEW.md, two axes)
+
+The review ran on the new REVIEW.md rather than `code-review`, which the installed skill still
+named, following D5.
+
+Fixed:
+
+- No behaviour when no stage is given and every open stage is blocked; the old text had one.
+- Free-text "Blocks" entries blocked nothing (D55, decided by the maintainer).
+- The worklog commit could sweep the user's own uncommitted edits in `WORKLOG.md`, the same case
+  that caused R7 (D56).
+- `check-changelog.sh` ignored `*`, `+` and numbered list items, and accepted short hex names as
+  SHAs. It now needs a full 40-character SHA.
+
+Not fixed: `](` inside a code span still counts as a link in `check-changelog.sh` (nit; the
+CHANGELOG has no such case).
