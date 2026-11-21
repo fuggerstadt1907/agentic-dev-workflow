@@ -317,7 +317,10 @@ Decided by the agent and logged: D58 (how the first screen is measured), D61, D6
 
 - AC12 (first screen at 1280×800 on GitHub): the maintainer views the README on GitHub.
 - The visibility switch (the maintainer's step, D62) and the external link check against the
-  repo's own URLs afterwards.
+  repo's own URLs afterwards. Done after the switch: lychee with `.github/lychee.toml`, no token,
+  19/19 own URLs 200 (12 issues, 7 `mcp-project-context` blob links); full run 79/79 OK. The
+  clone URL in `install.md` sits in a code block, so it was checked with an anonymous
+  `git ls-remote` instead. Line anchors (`#L…`) are not checkable.
 - This worklog commit came after the scan. Only the pre-push hook and CI's private-list check on
   `main` cover it.
 
@@ -336,3 +339,5 @@ Not fixed:
   (assumption, untested). Logged as open question Q1, blocking stage 12.
 - Merging removes the lychee exclusion while the repo is still private. If the weekly link check
   runs before the switch (Mondays 06:17 UTC), it opens an issue listing the 12 issue URLs as 404.
+
+The repo went public on 2026-11-21 at 13:45 UTC (14:45 CET), per GitHub's `PublicEvent` timestamp.
