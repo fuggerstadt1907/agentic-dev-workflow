@@ -414,9 +414,8 @@ is replaced in stage 1 and 4.
 | D42 | Legacy terms (stage 2) | Both skills read documents from the German version. The German terms appear only in one exact blockquote per SKILL.md ("Legacy terms from the German version"), split into status markers and headings/columns/IDs. The skills never write the German status markers. AC1 allows exactly that block; the check compares it verbatim and flags any other German | The maintainer's other projects have German requirements documents that must keep working after the switch |
 | D43 | Switch to the English skills (stage 2) | After the merge to `main`: move the German copies to `~/.claude/skills-backup-de/` (not deleted), copy `skills/` into `~/.claude/skills`, restart Claude Code, check that both skills show up and read an existing German requirements document correctly, record the SHA in the worklog | Rollback stays possible; the skill version stays fixed and traceable (R25); a half-built stage never runs itself |
 | D44 | Third-party wording (stage 2) | The review found passages close to Matt Pocock's `grilling`, `to-tickets` and `tdd` (frontier definition, later-round rule, file paths go stale, tracer slice, one-line seam note). They were rephrased, so no licence notice is needed | R3; the ideas stay and are credited in stage 4 (R17) |
+| D45 | AC1 check in the repo (stage 2) | `scripts/check-no-german.sh` checks `skills/` for German outside the legacy block, comparing the block byte for byte. CI runs it on every PR, after a `--self-test` that plants German outside and inside the block and must see both flagged | The check is the evidence for AC1 and has to be reproducible; the self-test keeps a broken check from passing silently |
 
 ## Open questions
 
-| # | Question | Owner | Blocks |
-| --- | --- | --- | --- |
-| Q1 | Follow-up from stage 2: should the AC1 check (no German outside the legacy block, block compared verbatim) become a script in `scripts/` and a CI step, so a later edit cannot reintroduce German text unnoticed? | Maintainer | Nothing |
+None.

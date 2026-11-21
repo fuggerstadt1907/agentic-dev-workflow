@@ -89,7 +89,7 @@ tip).
   run with the German version.
 - **Branch:** `stage-02-skills-english` · Ticket:
   [02-skills-in-english](tickets/02-skills-in-english.md) · Issue #2
-- **Time:** TODO
+- **Time:** ~60 min wall-clock, given by the maintainer
 
 ### Questions asked
 
@@ -98,7 +98,8 @@ tip).
    markers.
 2. Switch to the English skills: copy after the merge, with the German copies moved to
    `~/.claude/skills-backup-de/`, a restart and a test on a German requirements document (D43).
-3. Plan confirmation: confirmed.
+3. Plan confirmation: confirmed. After the first commit the maintainer asked to move the AC1 check
+   into the repo with a CI step (D45).
 4. During the build: reading German terms conflicts with AC1 ("no German text"). Decision: one
    exact legacy-terms block per SKILL.md, the AC1 exception covers exactly that block (D42).
 5. After the review: German projects keep headings and column names in their own language
@@ -106,10 +107,11 @@ tip).
 
 ### What was tested
 
-- AC1, no German: a script (kept outside the repo) blanks out the legacy block only when it
-  matches the allowed text verbatim, then greps for umlauts, ß and common German words.
-  `skills/` is clean. Positive controls: the German files from `main` give 229 hits; a German
-  sentence planted after the block and an edit inside the block are both flagged.
+- AC1, no German: `scripts/check-no-german.sh` blanks out the legacy block only when it matches
+  the allowed text byte for byte, then greps for umlauts, ß and common German words. `skills/` is
+  clean. Positive controls: the German files from `main` give 229 hits; `--self-test` plants a
+  German sentence after the block and an edit inside it, and both are flagged. CI runs the
+  self-test and the check on every PR (D45).
 - AC1, no behaviour change: side-by-side review of German and English by a fresh subagent (below).
 - R3: the reviewer compared the diff with Matt Pocock's `grilling`, `grill-me`, `grill-with-docs`,
   `tdd` and `to-tickets` using shared 4- and 5-word runs. After the fixes only generic runs remain.

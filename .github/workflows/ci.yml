@@ -41,6 +41,17 @@ jobs:
           test -f "$HOME/.claude/skills/implement-ticket/SKILL.md"
           claude plugin validate --strict "$HOME/.claude/skills"
 
+  no-german:
+    name: No German in skills (AC1)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # Self-test first: the check must flag planted German before a clean result counts.
+      - name: Self-test with planted German
+        run: scripts/check-no-german.sh --self-test
+      - name: Check skills/
+        run: scripts/check-no-german.sh skills
+
   privacy:
     name: Privacy lint
     runs-on: ubuntu-latest
