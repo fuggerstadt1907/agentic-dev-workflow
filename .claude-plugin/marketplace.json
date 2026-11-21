@@ -1,0 +1,17 @@
+{
+  "name": "agentic-dev-workflow",
+  "owner": {
+    "name": "Alessandro Orlandi",
+    "url": "https://github.com/fuggerstadt1907"
+  },
+  "metadata": {
+    "description": "Marketplace for the agentic-dev-workflow plugin: grill-ticket and implement-ticket."
+  },
+  "plugins": [
+    {
+      "name": "agentic-dev-workflow",
+      "source": "./",
+      "description": "grill-ticket and implement-ticket: from ticket to requirements to reviewed, committed stages."
+    }
+  ]
+}

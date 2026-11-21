@@ -1,0 +1,13 @@
+{
+  "name": "agentic-dev-workflow",
+  "version": "0.1.0",
+  "description": "Two skills for agentic development: grill a ticket into a requirements document, then implement it stage by stage with a fresh-context review.",
+  "author": {
+    "name": "Alessandro Orlandi",
+    "url": "https://github.com/fuggerstadt1907"
+  },
+  "homepage": "https://github.com/fuggerstadt1907/agentic-dev-workflow",
+  "repository": "https://github.com/fuggerstadt1907/agentic-dev-workflow",
+  "license": "MIT",
+  "keywords": ["skills", "requirements", "code-review", "workflow"]
+}

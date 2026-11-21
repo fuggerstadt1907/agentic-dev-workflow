@@ -1,0 +1,9 @@
+# External link check (PRs non-blocking, weekly scheduled run).
+max_retries = 3
+retry_wait_time = 5
+timeout = 20
+accept = ["200..=299", "429"]
+
+# While the repo is private, its own GitHub URLs 404 for anonymous requests.
+# Remove this exclusion in stage 4, when the repo goes public.
+exclude = ["^https://github\\.com/fuggerstadt1907/agentic-dev-workflow"]
