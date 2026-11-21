@@ -1,124 +1,134 @@
 ---
 name: grill-ticket
-description: Requirements-Phase für ein Ticket. Prüft es aus allen Blickwinkeln auf Readiness, fragt so lange nach, bis nichts mehr angenommen ist, und schreibt ein Requirements-Dokument (.md).
+description: Requirements phase for a ticket. Checks it from every angle for readiness, keeps asking until nothing rests on an assumption, and writes a requirements document (.md).
 disable-model-invocation: true
-argument-hint: '<#issue | Issue-URL | Datei | Ticket-Text | bestehendes Requirements-Dokument>'
+argument-hint: '<#issue | issue URL | file | ticket text | existing requirements document>'
 ---
 
 # Grill Ticket
 
-Du nimmst ein Ticket und löcherst den User, bis ihr ein gemeinsames Bild habt. Am Ende steht ein
-Requirements-Dokument mit Anforderungen, Abhängigkeiten und Zielbild.
+You take a ticket and keep questioning the user until the two of you see the same picture. The
+result is a requirements document with requirements, dependencies and a target picture.
 
-Grundsatz: **Fakten findest du selbst, Entscheidungen trifft der User.** Was im Code, in den Docs,
-im Schema oder im Ticket steht, schlägst du nach (per Subagent) und fragst nie danach. Alles, was
-eine Entscheidung ist, legst du dem User vor. Eine Lücke füllst du nie mit einer stillen Annahme:
-Entweder der User entscheidet sie, oder sie wird ausdrücklich geparkt.
+Principle: **You look up facts; the user makes decisions.** Whatever the code, the docs, the
+schema or the ticket already says, you check yourself (via subagent) and never ask about. Anything
+that is a decision goes to the user. You never fill a gap with a silent assumption: either the
+user decides it, or it is explicitly parked.
 
-Sprache von Fragen und Dokument: die Sprache des Projekts (aus `AGENTS.md`/`CLAUDE.md`/`docs/`
-ablesbar). Code-Bezeichner bleiben englisch.
+Questions and document are written in the project's language (as shown by
+`AGENTS.md`/`CLAUDE.md`/`docs/`). Code identifiers stay in English.
 
-## 1. Ticket einlesen
+## 1. Read the ticket
 
-Eingabe: `$ARGUMENTS`
+Input: `$ARGUMENTS`
 
-- `#123` oder GitHub-Issue-URL → `gh issue view <nr> --comments` (Body, Kommentare, Labels).
-- Dateipfad → Datei lesen (Markdown, Text, PDF, Bild …). Beginnt sie mit der Statuszeile aus
-  [TEMPLATE.md](TEMPLATE.md) (`> Status: ready | not ready · Ticket: …`), ist sie ein bestehendes
-  Requirements-Dokument → **Wiederaufnahme**: die „Offene Punkte“ und alles mit Status
-  `not ready` sind die Startfragen. Bereits Entschiedenes (Entscheidungsprotokoll) nie neu fragen.
-  Danach weiter bei Schritt 3. Jede andere Datei ist Ticket-Quelle.
-- Freitext → das ist das Ticket.
-- Mehrere Angaben (z. B. Issue + Datei mit Notizen) → zusammen sind sie das Ticket. Widersprechen
-  sich die Quellen, ist das eine Frage für Schritt 4.
-- Leer → nach dem Ticket fragen.
+- `#123` or a GitHub issue URL → `gh issue view <nr> --comments` (body, comments, labels).
+- File path → read the file (Markdown, text, PDF, image …). If it starts with the status line from
+  [TEMPLATE.md](TEMPLATE.md) (`> Status: ready | not ready · Ticket: …`), it is an existing
+  requirements document → **resume**: the open questions and everything with status `not ready`
+  are the starting questions. Never ask again about anything already decided (decision log). Then
+  continue with step 3. Any other file is a ticket source.
+- Free text → that is the ticket.
+- Several inputs (for example an issue plus a file with notes) → together they are the ticket. If
+  the sources contradict each other, that is a question for step 4.
+- Empty → ask for the ticket.
 
-Halte fest, woraus das Ticket stammt (Issue, Dateipfad, Freitext). Das kommt in die Statuszeile des
-Dokuments.
+Note where the ticket comes from (issue, file path, free text). It goes into the document's
+status line.
 
-## 2. Vorprüfung (parallel, per Subagents)
+Documents from the German version of the skills use the legacy terms below. Read them as their
+English equivalents; write as the block says.
 
-Starte in **einer** Nachricht parallel `Explore`-Subagents für:
+> **Legacy terms from the German version.** Status markers are machine-facing: written only in
+> English, read in both languages. `Stand` = `Updated` · `Etappe` = `Stage` · `offen` = `open` ·
+> `umgesetzt` = `done`. Headings, column names and criterion IDs are human-facing: written in the
+> project's language, read in both. `Etappen` = `Stages` · `AK` = `AC` ·
+> `Offene Punkte` = `Open questions` · `Entscheidungsprotokoll` = `Decision log` ·
+> `Wer klärt` = `Owner` · `Blockiert` = `Blocks`
 
-1. **Projektkonventionen**: `AGENTS.md`/`CLAUDE.md`, Struktur von `docs/`, Projektsprache, wo
-   Konzept-/Requirements-Dokumente liegen und wie sie heißen, projektspezifische Pflichtpunkte
-   (z. B. Mindestversionen, i18n, Hilfeartikel, Datenschutzerklärung).
-2. **Schon umgesetzt?** Nach dem _Konzept_ des Tickets suchen, nicht nur nach seinen Wörtern.
-   Melden, wo gesucht wurde und was gefunden wurde.
-3. **Backlog, Roadmap, bestehende Konzepte**: Gibt es das Thema schon (Feature-Backlog, Roadmap,
-   Konzeptdocs, verwandte Issues)? Dann baut ihr darauf auf.
-4. **Ist-Zustand**: betroffene Bereiche, Datenmodell, Schema, Schnittstellen. Hat das Projekt
-   einen Schema-Zugang (z. B. Supabase-MCP), lesend nutzen.
+## 2. Pre-check (in parallel, via subagents)
 
-## 3. Erstbild und Readiness
+In **one** message, start `Explore` subagents in parallel for:
 
-Zeige dem User kurz:
+1. **Project conventions**: `AGENTS.md`/`CLAUDE.md`, structure of `docs/`, project language, where
+   concept and requirements documents live and how they are named, project-specific must-haves
+   (for example minimum versions, i18n, help articles, privacy policy).
+2. **Already built?** Search for the ticket's _concept_, not just its words. Report where you
+   searched and what you found.
+3. **Backlog, roadmap, existing concepts**: Does the topic exist already (feature backlog, roadmap,
+   concept docs, related issues)? Then you build on it.
+4. **Current state**: affected areas, data model, schema, interfaces. If the project has schema
+   access (for example a Supabase MCP), use it read-only.
 
-- Das Ticket in 2–3 Sätzen, so wie du es verstehst.
-- Ergebnis der Vorprüfung (inkl. „schon umgesetzt in …“ oder „baut auf … auf“). Ist es schon
-  umgesetzt, frag, ob ihr trotzdem weitermacht.
-- Readiness je Blickwinkel aus [LENSES.md](LENSES.md): `klar` · `teilweise` · `offen` ·
-  `vermutlich nicht relevant`. Plus Zähler, z. B. „6/11 offen“.
+## 3. First picture and readiness
 
-`vermutlich nicht relevant` ist eine Vermutung und muss in einer Fragerunde bestätigt werden.
+Show the user briefly:
 
-## 4. Fragerunden
+- The ticket in 2–3 sentences, as you understand it.
+- The result of the pre-check (including "already built in …" or "builds on …"). If it is already
+  built, ask whether to continue anyway.
+- Readiness per lens from [LENSES.md](LENSES.md): `clear` · `partial` · `open` ·
+  `probably not relevant` (in the project's language). Plus a count, for example "6/11 open".
 
-Lies [LENSES.md](LENSES.md), falls noch nicht geschehen. Führe einen **Entscheidungsbaum**: Jede
-Entscheidung hat Folgeentscheidungen. Die **Frontier** sind alle Fragen, deren Voraussetzungen schon
-geklärt sind. Eine Frage, die von einer noch offenen Frage derselben Runde abhängt, gehört in eine
-spätere Runde.
+`probably not relevant` is a guess and has to be confirmed in a question round.
 
-Pro Runde fragst du die Frontier mit dem Tool `AskUserQuestion`:
+## 4. Question rounds
 
-- Max. 4 Fragen pro Aufruf. Ist die Frontier größer, zuerst die grundlegendsten (die mit den
-  meisten Folgefragen), dann der nächste Aufruf.
-- Jede Frage hat 2–4 Optionen. Deine Empfehlung steht zuerst und trägt „(Empfohlen)“; die
-  `description` begründet sie kurz. Offene Fragen (Namen, Zahlen, Texte) bekommen Vorschläge als
-  Optionen, freie Antwort geht über „Other“.
-- Für Mockups, Datenmodelle, Abläufe oder Textvarianten: `preview` nutzen.
-- `header` nennt den Blickwinkel (z. B. „Edge Case“, „Rollen“, „Schema“).
+Read [LENSES.md](LENSES.md) if you have not yet. Keep a **decision tree**: every decision has
+follow-up decisions. Questions whose preconditions have all been answered form the **frontier**.
+If a question can only be asked once another question of the current round is answered, hold it
+back for the next round.
 
-Zwischen den Runden:
+In each round you ask the frontier with the `AskUserQuestion` tool:
 
-- Jede Antwort verändert den Baum: Status der Blickwinkel aktualisieren, neue Frontier berechnen.
-- Braucht eine neue Frage einen Fakt, schick einen Subagent los. Stell solange die Fragen, die
-  nicht davon abhängen.
-- Widerspricht eine Antwort dem Code oder den Docs, sag es sofort: „Im Code passiert X, du
-  beschreibst Y. Was gilt?“
-- Unscharfe Begriffe schärfen („Meinst du mit ‚Mitglied‘ Rolle A oder Rolle B?“). Erfinde konkrete
-  Szenarien, die Grenzfälle erzwingen.
-- Antwortet der User „weiß nicht“ oder „muss ich klären“: Frage **parken**, mit Verantwortlichem
-  und dem, was sie blockiert. Geparkte Fragen machen den Status `not ready`.
+- At most 4 questions per call. If the frontier is larger, the most fundamental first (those with
+  the most follow-up questions), then the next call.
+- Every question has 2–4 options. Your recommendation comes first and is marked "(Recommended)"
+  in the project's language; its `description` gives a short reason. Open questions (names,
+  numbers, texts) get suggestions as options; a free answer goes through "Other".
+- For mockups, data models, flows or text variants: use `preview`.
+- `header` names the lens (for example "Edge case", "Roles", "Schema").
 
-**Fertig ist dieser Schritt erst, wenn** jeder Blickwinkel `klar`, bestätigt `nicht relevant` oder
-geparkt ist und die Frontier leer ist. Zähle nach, bevor du weitergehst.
+Between rounds:
 
-## 5. Gemeinsames Bild bestätigen
+- Every answer changes the tree: update the status of the lenses, work out the new frontier.
+- If a new question needs a fact, send a subagent. Meanwhile, ask the questions that do not depend
+  on it.
+- If an answer contradicts the code or the docs, say so at once: "The code does X, you describe Y.
+  Which one holds?"
+- Sharpen vague terms ("By 'member', do you mean role A or role B?"). Invent concrete scenarios
+  that force edge cases into the open.
+- If the user answers "don't know" or "need to check": **park** the question, with an owner and
+  what it blocks. Parked questions make the status `not ready`.
 
-Fasse kompakt zusammen: Ziel, wichtigste Anforderungen, Zielbild, Etappenschnitt (falls das
-Ticket mehr als eine lieferbare Einheit enthält; jede Etappe einzeln lieferbar und testbar),
-geparkte Punkte, Status. Frag per `AskUserQuestion`, ob das das gemeinsame Bild ist. Korrekturen
-führen zurück zu Schritt 4. Ohne Bestätigung wird nichts geschrieben.
+**This step is only done when** every lens is `clear`, confirmed `not relevant` or parked, and the
+frontier is empty. Count again before you move on.
 
-## 6. Dokument schreiben
+## 5. Confirm the shared picture
 
-- **Ort und Name** nach der Projektkonvention aus Schritt 2 (z. B. neben bestehenden
-  Konzeptdocs). Gibt es keine eindeutige Konvention, frag per `AskUserQuestion` mit Vorschlag.
-  Bei Wiederaufnahme: das bestehende Dokument aktualisieren.
-- **Aufbau** nach [TEMPLATE.md](TEMPLATE.md).
-- Zielbild auf Ebene von Modulen, Datenmodell, Schnittstellen und Entscheidungen. Keine Dateipfade
-  und kein Code: das veraltet schnell. Ausnahme: ein Schema oder Typ, der eine Entscheidung
-  genauer festhält als Prosa.
-- Ist der Skill `humanizer` verfügbar, lass den Fließtext des Dokuments durch ihn laufen
-  (Struktur, IDs und Fachbegriffe bleiben).
+Sum up briefly: goal, key requirements, target picture, stage split (if the ticket holds more than
+one deliverable unit; each stage deliverable and testable on its own), parked questions, status.
+Ask via `AskUserQuestion` whether this is the picture you both share. Corrections lead back to
+step 4. Nothing gets written without confirmation.
 
-## 7. Ticket aktualisieren (nur bei GitHub-Issue)
+## 6. Write the document
 
-Entwirf einen Kommentar: Status (`ready`/`not ready`), Zusammenfassung in 2–3 Sätzen, geparkte
-Punkte mit Verantwortlichen, Pfad zum Dokument. Zeig ihn dem User und poste erst nach dessen OK
-(`gh issue comment`). Labels nur setzen, wenn der User es sagt.
+- **Location and name** follow the project convention from step 2 (for example next to existing
+  concept docs). If there is no clear convention, ask via `AskUserQuestion` with a proposal. When
+  resuming: update the existing document.
+- **Structure** follows [TEMPLATE.md](TEMPLATE.md).
+- Target picture at the level of modules, data model, interfaces and decisions. Leave out file paths
+  and code, since both age fast, unless a schema or type states a decision more exactly than
+  words could.
+- If the `humanizer` skill is available, run the document's prose through it (structure, IDs and
+  domain terms stay).
 
-Zum Schluss: Pfad zum Dokument, Status und (falls `not ready`) was als Nächstes geklärt werden
-muss. Wiederaufnahme später mit `/grill-ticket <pfad-zum-dokument>`, Umsetzung bei `ready`
-(oder unblockierten Etappen) mit `/implement-ticket <pfad-zum-dokument>`.
+## 7. Update the ticket (GitHub issue only)
+
+Draft a comment: status (`ready`/`not ready`), a 2–3 sentence summary, parked questions with
+owners, path to the document. Show it to the user and post only after their OK
+(`gh issue comment`). Set labels only if the user says so.
+
+Finally: path to the document, status, and (if `not ready`) what needs settling next. Resume later
+with `/grill-ticket <path-to-document>`; implement when `ready` (or for unblocked stages) with
+`/implement-ticket <path-to-document>`.

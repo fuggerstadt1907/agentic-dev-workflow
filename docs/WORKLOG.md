@@ -81,3 +81,61 @@ Not fixed: the external link job's red check is non-blocking by design (D35).
 All tests above were rerun after the fixes, plus the review's cases (pattern in a file name,
 invalid and `\b` patterns, loose noreply addresses, colon and space in file names, unknown remote
 tip).
+
+## 2026-11-21 · Stage 2: Skills in English
+
+- **Skill version:** `implement-ticket` from the installed copy in `~/.claude/skills`, identical
+  (`diff -r`) to `skills/` at `0cf58ff` (`main`). German text, pre-1.0. This is the last stage
+  run with the German version.
+- **Branch:** `stage-02-skills-english` · Ticket:
+  [02-skills-in-english](tickets/02-skills-in-english.md) · Issue #2
+- **Time:** TODO
+
+### Questions asked
+
+1. Vocabulary: the terms of `requirements.md` (D41). The maintainer added that both skills keep
+   reading the German terms of older documents, and that the skills write only English status
+   markers.
+2. Switch to the English skills: copy after the merge, with the German copies moved to
+   `~/.claude/skills-backup-de/`, a restart and a test on a German requirements document (D43).
+3. Plan confirmation: confirmed.
+4. During the build: reading German terms conflicts with AC1 ("no German text"). Decision: one
+   exact legacy-terms block per SKILL.md, the AC1 exception covers exactly that block (D42).
+5. After the review: German projects keep headings and column names in their own language
+   (behaviour unchanged); only status markers are always English (D41).
+
+### What was tested
+
+- AC1, no German: a script (kept outside the repo) blanks out the legacy block only when it
+  matches the allowed text verbatim, then greps for umlauts, ß and common German words.
+  `skills/` is clean. Positive controls: the German files from `main` give 229 hits; a German
+  sentence planted after the block and an edit inside the block are both flagged.
+- AC1, no behaviour change: side-by-side review of German and English by a fresh subagent (below).
+- R3: the reviewer compared the diff with Matt Pocock's `grilling`, `grill-me`, `grill-with-docs`,
+  `tdd` and `to-tickets` using shared 4- and 5-word runs. After the fixes only generic runs remain.
+- `claude plugin validate --strict` for plugin and marketplace, the install check in an empty HOME
+  for both paths (Claude Code 2.1.330 locally): both pass, `details` lists both skills.
+
+### Not tested yet
+
+- The switch (D43) and reading a real German requirements document with the English skills. Both
+  happen after the merge.
+- The link check runs in CI only (lychee is not installed locally).
+
+### Review findings (fresh subagent, plus a re-check of the fixes)
+
+Fixed:
+
+- The template kept headings in the project's language while the legacy block said "never write"
+  them. Status markers and human-facing headings are now split explicitly.
+- Legacy mappings were missing for `AK`, `Etappen` and `Wer klärt`.
+- "Checks" meant two things in implement-ticket (per-criterion verification and the project's
+  checks); the first is now "verification".
+- Four passages were close to Pocock's wording (frontier definition, later-round rule, file paths
+  go stale, tracer slice, one-line seam note); rephrased.
+- Smaller: "clear the context" was descriptive instead of an instruction; "anything that leaves
+  the machine" was narrower than the German; user-facing labels were not marked as
+  project-language; "the document is the brief" clashed with `docs/brief.md`; the "Blocks"
+  column is now read in the document's language.
+
+Not fixed: none.

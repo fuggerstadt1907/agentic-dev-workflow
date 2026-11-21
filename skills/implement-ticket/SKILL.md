@@ -1,140 +1,151 @@
 ---
 name: implement-ticket
-description: Umsetzungs-Phase nach /grill-ticket. Setzt eine Etappe eines Requirements-Dokuments um, fragt bei jeder Lücke nach statt anzunehmen, prüft gegen die Akzeptanzkriterien, reviewt und committet.
+description: Implementation phase after /grill-ticket. Builds one stage of a requirements document, asks about every gap instead of assuming, checks the result against the acceptance criteria, reviews it and commits.
 disable-model-invocation: true
-argument-hint: '<pfad-zum-requirements-dokument> [Etappe <n>]'
+argument-hint: '<path-to-requirements-document> [stage <n>]'
 ---
 
 # Implement Ticket
 
-Du baust, was mit `/grill-ticket` entschieden wurde. Ein Lauf setzt **eine Etappe** um: Plan
-bestätigen, bauen, gegen die Akzeptanzkriterien prüfen, reviewen, committen, Dokument
-fortschreiben. Danach Kontext leeren, nächste Etappe im nächsten Lauf.
+You build what was decided with `/grill-ticket`. One run delivers **one stage**: confirm the plan,
+build, check against the acceptance criteria, review, commit, update the document. Then clear
+the context; the next stage gets its own run.
 
-Grundsätze:
+Principles:
 
-- **Das Dokument ist der Auftrag.** Was im Entscheidungsprotokoll steht, ist entschieden. Du baust
-  es so und stellst es nicht neu zur Diskussion.
-- **Fakten findest du selbst, Entscheidungen trifft der User.** Code, Docs und Schema schlägst du
-  nach (per Subagent). Jede **Lücke**, also alles, was das Dokument nicht entscheidet und was du
-  sonst raten müsstest, legst du dem User per `AskUserQuestion` vor. Das gilt auch mitten im Bauen.
-- **Nur die Etappe.** Gebaut werden die R-Nummern dieser Etappe, vollständig durch alle Schichten.
-  Was dir unterwegs zusätzlich auffällt, notierst du als Folgepunkt.
+- **The document is the mandate.** Whatever the decision log records is settled. You build it that
+  way and do not reopen it.
+- **You look up facts; the user makes decisions.** Code, docs and schema you check yourself (via
+  subagent). Every **gap**, meaning anything the document leaves undecided that you would
+  otherwise have to guess, goes to the user through `AskUserQuestion`. That holds in the middle of
+  the build as well.
+- **Only this stage.** You build the R-numbers of this stage, completely, through every layer.
+  Anything else you notice on the way becomes a follow-up item.
 
-Sprache von Fragen, Commits und Dokument-Updates: die Sprache des Projekts. Die Regeln aus
-`AGENTS.md`/`CLAUDE.md` gelten durchgehend, besonders für Migrationen, Deploys, Push und alles
-nach außen: Wo das Projekt eine Rückfrage verlangt, fragst du.
+Questions, commits and document updates are written in the project's language. The rules in
+`AGENTS.md`/`CLAUDE.md` apply throughout, above all for migrations, deploys, pushes and anything
+that goes out to other people: where the project asks for confirmation, you ask.
 
-## 1. Dokument und Etappe bestimmen
+## 1. Find the document and the stage
 
-Eingabe: `$ARGUMENTS`
+Input: `$ARGUMENTS`
 
-- Die Datei muss mit der Statuszeile von `/grill-ticket` beginnen
-  (`> Status: ready | not ready · Ticket: …`). Ist sie ein rohes Ticket, ein Issue, Freitext oder
-  leer: verweise auf `/grill-ticket <ticket>` und hör auf.
-- **Etappe:** die angegebene, sonst die erste mit Status `offen` im Abschnitt „Etappen“. Hat das
-  Dokument keine Etappen, ist das ganze Dokument eine Etappe. Sind alle umgesetzt, sag das und hör
-  auf.
-- **Status `not ready`:** Zeig die offenen Punkte und frag per `AskUserQuestion`, ob sie inzwischen
-  geklärt sind. Geklärtes wandert ins Entscheidungsprotokoll. Umgesetzt wird nur eine Etappe, die
-  von keinem verbleibenden offenen Punkt blockiert wird (Spalte „Blockiert“). Gibt es keine, nenne
-  die blockierenden Punkte, verweise auf `/grill-ticket <pfad>` und hör auf.
+- The file must start with the status line written by `/grill-ticket`
+  (`> Status: ready | not ready · Ticket: …`). If it is a raw ticket, an issue, free text or
+  empty, point to `/grill-ticket <ticket>` and stop.
+- **Stage:** the one given, otherwise the first with status `open` in the "Stages" section. If the
+  document has no stages, the whole document is one stage. If every stage is done, say so and
+  stop.
+- **Status `not ready`:** Show the open questions and ask via `AskUserQuestion` whether they have
+  been settled in the meantime. Settled answers move into the decision log. Only a stage that no
+  remaining open question blocks (the "Blocks" column, in the document's language) gets built.
+  If there is none, name the blocking questions, point to `/grill-ticket <path>` and stop.
 
-Nenne dem User Titel und Umfang (R-Nummern) der Etappe, bevor es weitergeht.
+Documents from the German version of the skills use the legacy terms below. Read them as their
+English equivalents; write as the block says.
 
-## 2. Kontext holen (parallel, per Subagents)
+> **Legacy terms from the German version.** Status markers are machine-facing: written only in
+> English, read in both languages. `Stand` = `Updated` · `Etappe` = `Stage` · `offen` = `open` ·
+> `umgesetzt` = `done`. Headings, column names and criterion IDs are human-facing: written in the
+> project's language, read in both. `Etappen` = `Stages` · `AK` = `AC` ·
+> `Offene Punkte` = `Open questions` · `Entscheidungsprotokoll` = `Decision log` ·
+> `Wer klärt` = `Owner` · `Blockiert` = `Blocks`
 
-Starte in **einer** Nachricht parallel `Explore`-Subagents für:
+Tell the user the title and scope (R-numbers) of the stage before you go on.
 
-1. **Projektkonventionen:** Check-Befehle (Typecheck, Lint, Format, Tests), Branch- und
-   Commit-Konventionen, Default-Branch, projektspezifische Pflichtpunkte (i18n, Doku, Hilfeartikel,
-   Mindestversionen …) und ob das Projekt Tests hat.
-2. **Ist-Zustand je Anforderung:** Für jede R-Nummer der Etappe die betroffenen Stellen im Code,
-   bestehende Muster, die du wiederverwenden kannst, und Schema/Schnittstellen. Hat das Projekt
-   einen Schema-Zugang, lesend nutzen.
-3. **Schon erledigt?** Ist ein Teil der Etappe bereits gebaut (Code, `git log`, offene Branches)?
-   Melden, wo gesucht und was gefunden wurde.
+## 2. Gather context (in parallel, via subagents)
 
-Weicht der Code von dem ab, was das Dokument als Ist-Zustand oder Zielbild annimmt, ist das eine
-Frage für Schritt 3.
+In **one** message, start `Explore` subagents in parallel for:
 
-## 3. Plan und Prüfpunkte bestätigen
+1. **Project conventions:** check commands (typecheck, lint, format, tests), branch and commit
+   conventions, default branch, project-specific must-haves (i18n, docs, help articles, minimum
+   versions …) and whether the project has tests.
+2. **Current state per requirement:** for each R-number of the stage, the affected places in the
+   code, existing patterns you can reuse, and schema/interfaces. If the project has schema access,
+   use it read-only.
+3. **Already done?** Is part of the stage built already (code, `git log`, open branches)? Report
+   where you searched and what you found.
 
-Zeig dem User kompakt:
+If the code differs from what the document assumes as current state or target picture, that is a
+question for step 3.
 
-- **Plan:** je R-Nummer, was sich in welchem Modul ändert, und die Reihenfolge (z. B. Schema vor
-  Client). Gebaut wird als **Tracer Bullet**: zuerst ein dünner Durchstich durch alle Schichten,
-  der die Kernanforderung sichtbar zum Laufen bringt, dann in die Breite.
-- **Prüfpunkte:** je Akzeptanzkriterium der Etappe, wie es geprüft wird. Hat das Projekt Tests:
-  welche Seams (öffentliche Schnittstellen) getestet werden, jeweils mit einer Zeile, was der Test
-  fängt und was nicht. Ohne Tests: was automatisch geht (Typecheck, Lint, eine Abfrage gegen das
-  Schema …) und welche Schritte der User manuell testet.
-- **Lücken:** alles, was das Dokument offen lässt oder wo Code und Dokument sich widersprechen.
-- **Git:** aktueller Branch. Steht er auf dem Default-Branch, schlag einen Feature-Branch nach
-  Projektkonvention vor. Ist der Working Tree nicht sauber, frag, was mit den Änderungen passiert.
+## 3. Confirm plan and verification
 
-Dann `AskUserQuestion`: erst die Lücken (je Frage 2–4 Optionen, Empfehlung zuerst mit
-„(Empfohlen)“, `description` mit kurzer Begründung, `preview` für Mockups, Datenmodelle, Texte),
-zuletzt die Bestätigung von Plan, Prüfpunkten und Branch. Max. 4 Fragen pro Aufruf, die
-grundlegendsten zuerst.
+Show the user, briefly:
 
-**Fertig ist dieser Schritt, wenn** der User Plan, Prüfpunkte und Branch bestätigt hat und keine
-Lücke mehr offen ist. Jede Antwort auf eine Lücke kommt ins Entscheidungsprotokoll (Schritt 6).
-Erst danach Branch anlegen und Code anfassen.
+- **Plan:** per R-number, what changes in which module, and the order (for example schema before
+  client). The build follows the **tracer bullet** idea: first a narrow slice that runs end to
+  end, touches all layers and visibly makes the core requirement work; then the breadth.
+- **Verification:** for each acceptance criterion of the stage, how it gets verified. If the
+  project has tests: which seams (public interfaces) get tested, each with one line saying which
+  failures the test would reveal and which would slip past it. Without tests: what can be
+  checked automatically (typecheck, lint, a query against the schema …) and which steps the user
+  tests by hand.
+- **Gaps:** everything the document leaves open, or where code and document disagree.
+- **Git:** the current branch. If it is the default branch, propose a feature branch following the
+  project's convention. If the working tree is not clean, ask what should happen to the changes.
 
-## 4. Bauen
+Then `AskUserQuestion`: the gaps first (2–4 options per question, your recommendation first and
+marked "(Recommended)" in the project's language, a `description` with a short reason, `preview`
+for mockups, data models, texts), and last the confirmation of plan, verification and branch. At
+most 4 questions per call, the most fundamental first.
 
-- Zuerst der Tracer Bullet, dann Anforderung für Anforderung. Nach jedem Schritt Typecheck (und
-  Lint, wenn schnell). Hat das Projekt Tests: an jedem bestätigten Seam erst ein roter Test, dann
-  nur so viel Code, dass er grün wird, einzelne Testdateien laufen lassen. Ist der Skill `tdd`
-  verfügbar, nutze ihn dafür.
-- Bestehende Muster und Helfer des Projekts wiederverwenden. Pflichtpunkte aus Schritt 2 (Texte in
-  allen Sprachen, Doku, Hilfeartikel …) und der Abschnitt „Doku & Hilfe“ des Dokuments gehören zur
-  Etappe.
-- **Lücke unterwegs:** Halte genau an dieser Stelle an und frag per `AskUserQuestion`. Bau
-  solange an Teilen weiter, die nicht von der Antwort abhängen. Widerspricht eine Antwort einer
-  früheren Entscheidung, nenn den Widerspruch ausdrücklich.
-- **Folgepunkte:** Bugs, Aufräumbedarf oder Ideen außerhalb der Etappe sammelst du in einer Liste
-  für Schritt 6.
+**This step is done when** the user has confirmed plan, verification and branch and no gap is
+left open. Every answer to a gap goes into the decision log (step 6). Only then create the branch
+and touch the code.
 
-Am Ende einmal alle Checks des Projekts (Typecheck, Lint, Format, komplette Testsuite).
+## 4. Build
 
-**Fertig ist dieser Schritt, wenn** alle Checks grün sind und jede R-Nummer der Etappe gebaut ist.
-Rote Checks behebst du; lässt sich einer nicht beheben, zeig dem User die Ausgabe und frag.
+- Tracer bullet first, then one requirement after another. After each step run the typecheck (and
+  lint, if it is fast). If the project has tests: at every confirmed seam, first a red test, then
+  only as much code as it takes to turn it green; run single test files. If the `tdd` skill is
+  available, use it for this.
+- Reuse the project's existing patterns and helpers. The must-haves from step 2 (texts in every
+  language, docs, help articles …) and the document's "Docs and help" section are part of the
+  stage.
+- **A gap during the build:** stop right at that point and ask via `AskUserQuestion`. Meanwhile,
+  keep building the parts that do not depend on the answer. If an answer contradicts an earlier
+  decision, name the contradiction explicitly.
+- **Follow-up items:** bugs, clean-up needs or ideas outside the stage go into a list for step 6.
+
+At the end, run all of the project's checks once (typecheck, lint, format, full test suite).
+
+**This step is done when** all checks are green and every R-number of the stage is built. Fix red
+checks; if one cannot be fixed, show the user the output and ask.
 
 ## 5. Review
 
-Starte für das Review einen **frischen Subagent**, der den Code nicht geschrieben hat. Ist der
-Skill `code-review` verfügbar, nutze ihn. Gib ihm Kontext-Pointer statt Zusammenfassungen: Pfad
-zum Dokument, die Etappe, den Diff seit dem Abzweig. Zwei getrennte Achsen:
+For the review, start a **fresh subagent** that did not write the code. If the `code-review`
+skill is available, use it. Give it pointers to the context, not summaries: path to the document,
+the stage, the diff since the branch point. Two separate axes:
 
-- **Standards:** Hält sich der Diff an die dokumentierten Konventionen des Projekts?
-- **Spec:** Ist jede R-Nummer der Etappe vollständig umgesetzt, ist jedes Akzeptanzkriterium
-  erfüllt, und steckt im Diff etwas, das die Etappe nicht verlangt?
+- **Standards:** Does the diff follow the project's documented conventions?
+- **Spec:** Is every R-number of the stage fully implemented, is every acceptance criterion met,
+  and does the diff contain anything the stage does not ask for?
 
-Echte Fehler behebst du und lässt die Checks erneut laufen. Ist ein Fund eine Entscheidung (z. B.
-„so gewollt?“), frag den User. Nicht behobene Funde kommen in den Abschlussbericht.
+Fix real defects and run the checks again. If a finding is a decision (for example "intended like
+this?"), ask the user. Findings that are not fixed go into the final report.
 
-## 6. Abschluss
+## 6. Close
 
-1. **Dokument fortschreiben:**
-   - Etappe auf `umgesetzt · <YYYY-MM-DD> · <branch>` setzen.
-   - Neue Entscheidungen aus Schritt 3 und 4 ins Entscheidungsprotokoll (mit Begründung).
-   - Neu aufgetauchte Fragen unter „Offene Punkte“, Folgepunkte dorthin, wo das Projekt Backlog
-     und Bugs führt (z. B. Roadmap, Feature-Backlog). Gibt es keinen solchen Ort, unter „Offene
-     Punkte“.
-   - Zielbild nur anpassen, wenn eine Entscheidung es geändert hat.
-2. **Bericht an den User:**
-   - je Akzeptanzkriterium: `automatisch geprüft` (wie) oder `manuell testen` (konkrete Schritte),
-   - Abweichungen vom Plan und ihr Grund,
-   - nicht behobene Review-Funde,
-   - Folgepunkte.
-3. **Commit:** ein Commit für die Etappe (Code und Dokument-Update) nach Projektkonvention. Ist der
-   Skill `humanizer` verfügbar, lass Commit-Message und neue Fließtexte im Dokument durch ihn
-   laufen.
-4. **Push, PR, Issue-Kommentar** nur nach OK des User. Stammt das Ticket aus einem GitHub-Issue
-   und ist die letzte Etappe umgesetzt, schlag einen Kommentar bzw. „Closes #…“ im PR vor und zeig
-   den Entwurf vorher.
+1. **Update the document:**
+   - Set the stage to `done · <YYYY-MM-DD> · <branch>`.
+   - New decisions from steps 3 and 4 go into the decision log (with reason).
+   - New questions go under open questions; follow-up items go where the project keeps its backlog
+     and bugs (for example a roadmap or feature backlog). If there is no such place, under open
+     questions.
+   - Change the target picture only if a decision changed it.
+2. **Report to the user:**
+   - per acceptance criterion: `checked automatically` (how) or `test manually` (concrete
+     steps), both labels in the project's language,
+   - deviations from the plan and why,
+   - review findings that were not fixed,
+   - follow-up items.
+3. **Commit:** one commit for the stage (code and document update), following the project's
+   convention. If the `humanizer` skill is available, run the commit message and new prose in the
+   document through it.
+4. **Push, PR, issue comment** only after the user's OK. If the ticket came from a GitHub issue and
+   the last stage is done, propose a comment or "Closes #…" in the PR and show the draft first.
 
-Zum Schluss: Branch, Commit, nächste offene Etappe. Weiter mit `/clear` und
-`/implement-ticket <pfad-zum-dokument>`.
+Finally: branch, commit, next open stage. Continue with `/clear` and
+`/implement-ticket <path-to-document>`.
