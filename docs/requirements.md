@@ -192,7 +192,8 @@ shows whatever the eval measured, including metrics where the skill does not bea
 ### Acceptance criteria
 
 - **AC1 (R1, R3)**: Given stage 2 is done, when `skills/` is searched, then it contains no German
-  text, and a side-by-side check against the German version lists no behaviour change.
+  text apart from the legacy-terms block that both skills read (D42), and a side-by-side check
+  against the German version lists no behaviour change.
 - **AC2 (R2, R23)**: Given a fresh HOME, when the CI install check runs, then both install paths
   pass and `claude plugin details` lists `grill-ticket` and `implement-ticket`.
 - **AC3 (R4)**: Given a `not ready` document whose stage 2 is touched by an open question, when
@@ -326,7 +327,7 @@ to the ticket file whose `NN` is *n* (zero-padded) and to issue #*n*.
   R21, R22, R23, R24, R25. Rewrite the initial commit to noreply, then push to a private GitHub
   repo; CI is green on a PR; tickets and issues exist. Testable through CI and a planted lint
   violation.
-- **Stage 2: Skills in English** · open · R1, R3. Pure translation, behaviour unchanged; testable
+- **Stage 2: Skills in English** · done · 2026-11-21 · stage-02-skills-english · R1, R3. Pure translation, behaviour unchanged; testable
   by side-by-side review. The maintainer switches to the English version afterwards.
 - **Stage 3: Skills 1.0** · open · R4–R13. Lessons from the case study, REVIEW.md, worklog step,
   CHANGELOG. Testable with AC3–AC11 on a small scratch project.
@@ -409,6 +410,11 @@ is replaced in stage 1 and 4.
 | D38 | Plugin version (stage 1) | `0.1.0` until the 1.0 release | R39 sets 1.0.0 |
 | D39 | Ticket files (stage 1) | Thin: title, R-numbers, scope line, issue link, pointer to this document | Decisions live in one place |
 | D40 | AC16 wording (stage 1) | AC16 plants a fake home path other than `someone`; the stage 1 test used a fake `example` user | The old wording planted exactly the allowed placeholder and could not fail |
+| D41 | Vocabulary (stage 2) | The English skills use the terms of this document: `Updated`, `Stage n: <title>`, `open`, `done · <date> · <branch>`, `AC1`, Decision log, Open questions (Question, Owner, Blocks). Status markers (status line fields, stage label, stage status) are machine-facing and always written in English. Headings, column names, criterion IDs and user-facing labels such as "(Recommended)" are human-facing and follow the project's language. The per-criterion test plan is called "verification", so it is not confused with the project's checks | One vocabulary across template, skill and existing document; markers the skills parse must not depend on the language, while what people read stays in their language as before (R3) |
+| D42 | Legacy terms (stage 2) | Both skills read documents from the German version. The German terms appear only in one exact blockquote per SKILL.md ("Legacy terms from the German version"), split into status markers and headings/columns/IDs. The skills never write the German status markers. AC1 allows exactly that block; the check compares it verbatim and flags any other German | The maintainer's other projects have German requirements documents that must keep working after the switch |
+| D43 | Switch to the English skills (stage 2) | After the merge to `main`: move the German copies to `~/.claude/skills-backup-de/` (not deleted), copy `skills/` into `~/.claude/skills`, restart Claude Code, check that both skills show up and read an existing German requirements document correctly, record the SHA in the worklog | Rollback stays possible; the skill version stays fixed and traceable (R25); a half-built stage never runs itself |
+| D44 | Third-party wording (stage 2) | The review found passages close to Matt Pocock's `grilling`, `to-tickets` and `tdd` (frontier definition, later-round rule, file paths go stale, tracer slice, one-line seam note). They were rephrased, so no licence notice is needed | R3; the ideas stay and are credited in stage 4 (R17) |
+| D45 | AC1 check in the repo (stage 2) | `scripts/check-no-german.sh` checks `skills/` for German outside the legacy block, comparing the block byte for byte. CI runs it on every PR, after a `--self-test` that plants German outside and inside the block and must see both flagged | The check is the evidence for AC1 and has to be reproducible; the self-test keeps a broken check from passing silently |
 
 ## Open questions
 

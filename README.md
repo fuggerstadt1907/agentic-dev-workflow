@@ -5,8 +5,8 @@ document with decisions and stages. `implement-ticket` builds one stage at a tim
 by a fresh subagent and one commit per stage.
 
 > Work in progress. This README is a stub; the full version with the workflow diagram follows in
-> stage 4 of [the requirements](docs/requirements.md#stages). The skill texts are still in German
-> until stage 2; they work in the language of the project they run in.
+> stage 4 of [the requirements](docs/requirements.md#stages). The skills are written in English and
+> work in the language of the project they run in.
 
 ## Install
 

@@ -1,70 +1,72 @@
-# Vorlage Requirements-Dokument
+# Requirements document template
 
-Überschriften in der Projektsprache. Abschnitte, deren Blickwinkel bestätigt nicht relevant ist,
-bleiben mit einem Satz stehen („Keine Schemaänderung.“), damit sichtbar ist, dass sie geprüft
-wurden.
+Headings, column names and criterion IDs (`AC1`) in the project's language. The status line
+fields (`Status`, `Ticket`, `Updated`), the stage label (`Stage`) and the stage status (`open`,
+`done`) stay in English, because `/implement-ticket` reads them. Sections whose lens is confirmed
+not relevant stay in with one sentence ("No schema change.") so it is visible that they were
+checked.
 
 ```markdown
-# <Titel>
+# <Title>
 
-> Status: ready | not ready · Ticket: <#123 / Link / Dateipfad / „Freitext“> · Stand: <YYYY-MM-DD>
+> Status: ready | not ready · Ticket: <#123 / link / file path / "free text"> · Updated: <YYYY-MM-DD>
 
-## Zusammenfassung
+## Summary
 
-2–3 Sätze: was, für wen, warum.
+2–3 sentences: what, for whom, why.
 
-## Problem & Ziel
+## Problem and goal
 
-Problem aus Sicht der Betroffenen. Erfolgskriterium.
+The problem as the people affected see it. Success criterion.
 
-## Akteure & Rollen
+## Actors and roles
 
-Wer was darf, als Liste oder Tabelle.
+Who may do what, as a list or table.
 
-## Anforderungen
+## Requirements
 
 - **R1** – …
 - **R2** – …
 
-### Akzeptanzkriterien
+### Acceptance criteria
 
-- **AK1 (R1)** – Given … When … Then …
+- **AC1 (R1)** – Given … When … Then …
 
-## Edge Cases & Fehlerfälle
+## Edge cases and failure modes
 
-## UX/UI & Texte
+## UX/UI and texts
 
-## Daten & Schema
+## Data and schema
 
-## Sicherheit & Datenschutz
+## Security and data protection
 
-## Abhängigkeiten
+## Dependencies
 
-## Zielbild (Lösung)
+## Target picture (solution)
 
-Betroffene Bereiche, Datenmodell, Schnittstellen. Jede Entscheidung mit kurzer Begründung und der
-verworfenen Alternative.
+Affected areas, data model, interfaces. Every decision with a short reason and the rejected
+alternative.
 
-### Etappen
+### Stages
 
-Nur wenn sinnvoll. Pro Etappe: Umfang (R-Nummern), warum sie für sich lieferbar und testbar ist,
-und ein Status (`offen`, später von `/implement-ticket` gesetzt: `umgesetzt · <Datum> · <Branch>`).
+Only where it makes sense. Per stage: scope (R-numbers), why it is deliverable and testable on its
+own, and a status (`open`, later set by `/implement-ticket` to `done · <date> · <branch>`).
 
-- **Etappe 1 – <Titel>** · offen · R1, R2 – …
+- **Stage 1: <title>** · open · R1, R2 – …
 
-## Rollout & Release
+## Rollout and release
 
-## Nicht-Ziele
+## Non-goals
 
-## Doku & Hilfe
+## Docs and help
 
-## Entscheidungsprotokoll
+## Decision log
 
-| #   | Frage | Entscheidung | Begründung |
-| --- | ----- | ------------ | ---------- |
+| #   | Question | Decision | Reason |
+| --- | -------- | -------- | ------ |
 
-## Offene Punkte
+## Open questions
 
-| #   | Frage | Wer klärt | Blockiert |
-| --- | ----- | --------- | --------- |
+| #   | Question | Owner | Blocks |
+| --- | -------- | ----- | ------ |
 ```
