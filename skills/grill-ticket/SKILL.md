@@ -87,6 +87,9 @@ In each round you ask the frontier with the `AskUserQuestion` tool:
   in the project's language; its `description` gives a short reason. Open questions (names,
   numbers, texts) get suggestions as options; a free answer goes through "Other".
 - For mockups, data models, flows or text variants: use `preview`.
+- A question that rests on a technical claim ("the API returns X", "this table has no index")
+  says how the claim was verified (file and line read, command run, doc checked) or marks it as
+  an assumption, in the project's language.
 - `header` names the lens (for example "Edge case", "Roles", "Schema").
 
 Between rounds:
@@ -99,7 +102,8 @@ Between rounds:
 - Sharpen vague terms ("By 'member', do you mean role A or role B?"). Invent concrete scenarios
   that force edge cases into the open.
 - If the user answers "don't know" or "need to check": **park** the question, with an owner and
-  what it blocks. Parked questions make the status `not ready`.
+  what it blocks, named by stage, R-number or AC ID (`/implement-ticket` reads these to decide
+  which stages it can build). Parked questions make the status `not ready`.
 
 **This step is only done when** every lens is `clear`, confirmed `not relevant` or parked, and the
 frontier is empty. Count again before you move on.
@@ -116,7 +120,8 @@ step 4. Nothing gets written without confirmation.
 - **Location and name** follow the project convention from step 2 (for example next to existing
   concept docs). If there is no clear convention, ask via `AskUserQuestion` with a proposal. When
   resuming: update the existing document.
-- **Structure** follows [TEMPLATE.md](TEMPLATE.md).
+- **Structure** follows [TEMPLATE.md](TEMPLATE.md). Map every stage to the ticket it is tracked
+  in (ticket file or issue), so `/implement-ticket` can point from a ticket to its stage.
 - Target picture at the level of modules, data model, interfaces and decisions. Leave out file paths
   and code, since both age fast, unless a schema or type states a decision more exactly than
   words could.

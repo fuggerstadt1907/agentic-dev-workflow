@@ -52,6 +52,17 @@ jobs:
       - name: Check skills/
         run: scripts/check-no-german.sh skills
 
+  changelog:
+    name: CHANGELOG links (AC11)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # Self-test first: the check must flag planted defects before a clean result counts.
+      - name: Self-test with planted defects
+        run: scripts/check-changelog.sh --self-test
+      - name: Check CHANGELOG.md
+        run: scripts/check-changelog.sh CHANGELOG.md
+
   privacy:
     name: Privacy lint
     runs-on: ubuntu-latest

@@ -69,9 +69,10 @@ shows whatever the eval measured, including metrics where the skill does not bea
 - **R11**: In the build step, every negative test ("X never appears") gets a positive check that X
   is really present in the input.
 - **R12**: If the project has a `WORKLOG.md`, implement-ticket drafts the entry in its closing step:
-  questions asked, review findings, what was and was not tested. It leaves "Time" as TODO, proposes
-  a time in its report, and commits the entry only after the user's OK. Without a `WORKLOG.md`
-  there is no worklog step.
+  questions asked, review findings, what was and was not tested. It leaves "Time" as TODO and asks
+  the user for it instead of proposing one; it may show the run's start and current time, labelled
+  as raw timestamps (D47). It commits the entry, in its own commit, only after the user's OK and
+  time (D48). Without a `WORKLOG.md` there is no worklog step.
 - **R13**: A `CHANGELOG.md` links every change to the worklog entry that caused it. Links into the
   case study use permalinks with a commit SHA; later entries link to this repo's worklog.
 
@@ -213,8 +214,8 @@ shows whatever the eval measured, including metrics where the skill does not bea
   contains attacker-view acceptance criteria; given a negative test in the diff, then a positive
   check for the same input exists next to it.
 - **AC10 (R12)**: Given a project with `WORKLOG.md`, when a stage closes, then a draft entry exists
-  with Time "TODO" and nothing is committed before the user's OK; given no `WORKLOG.md`, no worklog
-  file is created.
+  with Time "TODO", no time is proposed, and the worklog entry is not committed before the user's OK
+  and time; given no `WORKLOG.md`, no worklog file is created.
 - **AC11 (R13)**: Every CHANGELOG entry has at least one link; every link into
   `mcp-project-context` contains a commit SHA.
 - **AC12 (R14, R15)**: Given a 1280×800 browser window on GitHub, the README's first screen shows
@@ -329,7 +330,7 @@ to the ticket file whose `NN` is *n* (zero-padded) and to issue #*n*.
   violation.
 - **Stage 2: Skills in English** · done · 2026-11-21 · stage-02-skills-english · R1, R3. Pure translation, behaviour unchanged; testable
   by side-by-side review. The maintainer switches to the English version afterwards.
-- **Stage 3: Skills 1.0** · open · R4–R13. Lessons from the case study, REVIEW.md, worklog step,
+- **Stage 3: Skills 1.0** · done · 2026-11-21 · stage-03-skills-1-0 · R4–R13. Lessons from the case study, REVIEW.md, worklog step,
   CHANGELOG. Testable with AC3–AC11 on a small scratch project.
 - **Stage 4: Docs and going public** · open · R14 (with status line), R15, R16, R17, R18, R38.
   Also remove the exclusion of this repo's own URLs from `.github/lychee.toml` (D35).
@@ -415,6 +416,17 @@ is replaced in stage 1 and 4.
 | D43 | Switch to the English skills (stage 2) | After the merge to `main`: move the German copies to `~/.claude/skills-backup-de/` (not deleted), copy `skills/` into `~/.claude/skills`, restart Claude Code, check that both skills show up and read an existing German requirements document correctly, record the SHA in the worklog | Rollback stays possible; the skill version stays fixed and traceable (R25); a half-built stage never runs itself |
 | D44 | Third-party wording (stage 2) | The review found passages close to Matt Pocock's `grilling`, `to-tickets` and `tdd` (frontier definition, later-round rule, file paths go stale, tracer slice, one-line seam note). They were rephrased, so no licence notice is needed | R3; the ideas stay and are credited in stage 4 (R17) |
 | D45 | AC1 check in the repo (stage 2) | `scripts/check-no-german.sh` checks `skills/` for German outside the legacy block, comparing the block byte for byte. CI runs it on every PR, after a `--self-test` that plants German outside and inside the block and must see both flagged | The check is the evidence for AC1 and has to be reproducible; the self-test keeps a broken check from passing silently |
+| D46 | Extra question round (stage 3) | The plan round is the one round of R6. A second round is allowed only for a decision in the ask categories that the plan could not have foreseen; only the dependent part stops, the rest keeps building. The report names the trigger and why the plan missed it, and the worklog counts extra rounds | Unforeseeable scope or security decisions must not be guessed; frequent extra rounds are a signal to improve the plan step |
+| D47 | Worklog time (stage 3) | The skill does not estimate or propose a time. It leaves `TODO` and asks the user; at most it shows the run's start and current time, labelled as raw timestamps. Amends R12, which said "proposes a time" | An agent's estimate is not a measured fact |
+| D48 | Worklog commit (stage 3) | The stage commit (code and document) stays as before; only the worklog entry waits for the user's OK and time, then gets its own commit. AC10 reworded to match | Keeps the build flow unchanged; the worklog records what the user confirms |
+| D49 | Blocked stages (stage 3) | An open question blocks a stage when its "Blocks" column names the stage, one of its R-numbers or ACs; an empty entry or one naming the whole document blocks every stage. The skill no longer asks at the start whether open questions are settled. A refusal names the blocking questions, points to `/grill-ticket <path>` and lists the unblocked open stages. Decided by the agent | R4 says refuse; settling questions is grill-ticket's job; an extra question at the start would break R6's one round |
+| D50 | Ticket lookup (stage 3) | On a raw ticket or issue, the skill searches files that start with the status line and matches the ticket against stage lines, a stage-to-ticket rule, the `Ticket:` field, or a link back from the ticket file. The template's stage line gets `· Ticket: <file / #issue>`. Decided by the agent | Covers both the per-stage field and documents like this one that state a mapping rule |
+| D51 | REVIEW.md content (stage 3) | Method, the two axes, and a finding format that needs a concrete failure and evidence; no checklist of defect classes. A rule about checks that cannot fail was left out because R11 covers it in the build step (D15). Decided by the agent | R5 and D29: the review must stay generic so the review eval does not measure its own checklist |
+| D52 | Labels and security relevance (stage 3) | The "assumption" label follows the project's language, like "(Recommended)" (D41). A stage is security-relevant if the document marks it so or it touches authentication, authorization, secrets, untrusted input, personal data or the security section; attacker-view ACs go into the document's acceptance criteria at close. Decided by the agent | Human-facing labels follow D41; a marker alone would miss unmarked stages |
+| D53 | AC11 check (stage 3) | `scripts/check-changelog.sh` with a self-test, run in CI on every PR. Entries are list items (`-`, `*`, `+`, `1.`) below the first `##` heading; a case-study link needs a full 40-character SHA after `/blob/`, `/tree/`, `/raw/` or `/commit/`. Case-study links are pinned to `127aae8`; the R4, R5, R12 and R13 entries link to this repo's stage 3 worklog entry | AC11 stays checked after this stage; the self-test keeps a broken check from passing silently (as in D45) |
+| D54 | Verifying stage 3 | AC3 (refusal) and AC8 run headless with `claude -p --plugin-dir` on a scratch project, after a load check of the plugin command. Everything else is one manual run by the maintainer on the same scratch project, also with `--plugin-dir`, never the installed copies. Results per AC go into the worklog | Tests the new version, not the installed one; headless runs cannot answer questions |
+| D55 | Free-text "Blocks" entries (stage 3, review) | implement-ticket treats a "Blocks" entry without a stage, R or AC ID as blocking every stage whose requirements it touches, and as blocking when unsure (fail closed). grill-ticket and the template name stages, R-numbers or AC IDs in "Blocks". Asked as the stage's one extra round (D46): the review found it, the plan had not foreseen it | Free text failed open and could let a stage be built on an unsettled decision; older documents keep working |
+| D56 | User edits in files the stage touches (stage 3, review) | If a file the skill edits (the worklog included) already had uncommitted changes of the user's, the skill stages only its own hunks or asks; the worklog confirmation names such changes. Decided by the agent | The R7 incident in the case study was exactly a swept worklog note |
 
 ## Open questions
 
