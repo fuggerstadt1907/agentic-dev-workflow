@@ -121,14 +121,17 @@ tip).
 ### Not tested yet
 
 - The link check runs in CI only (lychee is not installed locally); it passed on PR #15.
-- D43: reading an existing German requirements document with the installed English skills. Not
-  run yet.
 
 ### Switch to the English skills (after the merge, D43)
 
 - PR #15 merged as `e36a6d8`. The German copies moved to `~/.claude/skills-backup-de/`, identical
   (`diff -r`) to `skills/` at `0cf58ff`. `~/.claude/skills` now holds `skills/` from `e36a6d8`,
   checked with `diff -r`.
+- German requirements document, run by the maintainer in `mcp-project-context` with the installed
+  English `implement-ticket`: the document was read correctly. Stages 01–10 and 12 were recognised
+  as done, ticket 11 as the only open one. The skill did not build it and pointed to
+  `/grill-ticket` on the ticket file because of about ten unresolved decisions; the maintainer
+  chose to leave it open. Nothing was built, and the working tree stayed clean. Result: passed.
 - From stage 3 on, the skills run from the installed English copy at `e36a6d8`.
 
 ### Review findings (fresh subagent, plus a re-check of the fixes)
